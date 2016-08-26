@@ -2,6 +2,8 @@ import nengo
 import nengo_ocl
 import pyopencl as cl
 
+import gosmann_frontiers2016.optimized.simulator as optsim
+
 
 def get_devices(device_type):
     for platform in cl.get_platforms():
@@ -26,3 +28,7 @@ def ocl_gpu():
 
 def ocl_cpu():
     return ocl(cl.device_type.CPU)
+
+
+def optimized():
+    return optsim.Simulator

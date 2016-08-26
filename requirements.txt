@@ -3,3 +3,4 @@ nengo
 nengo_ocl
 numpy
 psutil
+scipy
