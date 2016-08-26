@@ -5,11 +5,11 @@ import time
 from nengo.rc import rc
 import psutil
 
+from gosmann_frontiers2016 import backends
+
 
 def load_backend(backend):
-    mod = importlib.import_module(backend)
-    return mod.Simulator
-
+    return getattr(backends, backend)()
 
 class TimeBlock(object):
     def __init__(self):

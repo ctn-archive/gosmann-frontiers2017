@@ -1,4 +1,5 @@
 git+git://github.com/jgosmann/psyrun.git#egg=psyrun
 nengo
+nengo_ocl
 numpy
 psutil
