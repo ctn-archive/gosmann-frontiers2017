@@ -1,14 +1,15 @@
 import nengo
 
 
-def lorenz(seed=None):
+def lorenz(n_neurons=2000, seed=None):
     tau = 0.1
     sigma = 10.
     beta = 8. / 3.
     rho = 28.
 
     with nengo.Network(seed=seed, label="Lorenz attractor") as model:
-        model.state = nengo.Ensemble(n_neurons=2000, dimensions=3, radius=60.)
+        model.state = nengo.Ensemble(
+            n_neurons=n_neurons, dimensions=3, radius=60.)
 
         def feedback(x):
             dx0 = -sigma * x[0] + sigma * x[1]

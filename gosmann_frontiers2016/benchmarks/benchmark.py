@@ -111,6 +111,7 @@ def benchmark_memory(model, backend='nengo'):
 
     with BenckmarkEnv():
         with RecordMemUsage() as mem_record:
+            mem_record.event()
             sim = Simulator(model)
             with sim:
                 mem_record.event()

@@ -1,10 +1,12 @@
 import nengo
 
 
-def comm_channel(seed=None):
+def comm_channel(n_neurons=50, dimensions=1, seed=None):
     with nengo.Network(seed=seed, label="Communication channel") as model:
-        model.ens_a = nengo.Ensemble(n_neurons=30, dimensions=1)
-        model.ens_b = nengo.Ensemble(n_neurons=30, dimensions=1)
+        model.ens_a = nengo.Ensemble(
+            n_neurons=n_neurons // 2, dimensions=dimensions)
+        model.ens_b = nengo.Ensemble(
+            n_neurons=n_neurons // 2, dimensions=dimensions)
 
         model.stimulus = nengo.Node(0.5)
         nengo.Connection(model.stimulus, model.ens_a)
