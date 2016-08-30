@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import nengo
 
 
@@ -24,3 +26,15 @@ def lorenz(n_neurons=2000, seed=None):
         model.p_state = nengo.Probe(model.state, synapse=tau)
 
     return model
+
+
+if __name__ == '__main__':
+    model = lorenz()
+    with nengo.Simulator(model) as sim:
+        sim.run(6.)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    d = sim.data[model.p_state]
+    ax.plot(d[:, 0], d[:, 1], d[:, 2])
+    plt.show()

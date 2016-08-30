@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import nengo
 import numpy as np
 
@@ -15,6 +16,25 @@ def circ_conv(n_neurons=200, dimensions=4, seed=None):
         nengo.Connection(model.input_a, model.cconv.A)
         nengo.Connection(model.input_b, model.cconv.B)
 
-        model.p_result = nengo.Probe(model.cconv.output, synapse=0.02)
+        model.p_input_a = nengo.Probe(model.input_a, synapse=0.01)
+        model.p_input_b = nengo.Probe(model.input_b, synapse=0.01)
+        model.p_output = nengo.Probe(model.cconv.output, synapse=0.01)
 
     return model
+
+
+if __name__ == '__main__':
+    model = circ_conv()
+    with nengo.Simulator(model) as sim:
+        sim.run(1.)
+
+    plt.figure()
+    plt.subplot(3, 1, 1)
+    plt.plot(sim.trange(), sim.data[model.p_input_a])
+    plt.subplot(3, 1, 2)
+    plt.plot(sim.trange(), sim.data[model.p_input_b])
+    plt.subplot(3, 1, 3)
+    plt.plot(sim.trange(), sim.data[model.p_output])
+    plt.xlabel("Time (s)")
+    plt.tight_layout()
+    plt.show()

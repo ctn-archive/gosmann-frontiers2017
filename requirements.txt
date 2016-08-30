@@ -1,4 +1,5 @@
 git+git://github.com/jgosmann/psyrun.git#egg=psyrun
+matplotlib
 nengo
 nengo_ocl
 numpy
