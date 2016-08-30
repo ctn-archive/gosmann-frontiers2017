@@ -7,8 +7,8 @@ def circ_conv(n_neurons=200, dimensions=4, seed=None):
         v = np.random.randn(2, dimensions)
         v /= np.linalg.norm(v, axis=1)[:, None]
 
-        model.input_a = nengo.Node(v[0])
-        model.input_b = nengo.Node(v[1])
+        model.input_a = nengo.Node(np.array(v[0]))
+        model.input_b = nengo.Node(np.array(v[1]))
 
         model.cconv = nengo.networks.CircularConvolution(
             n_neurons=n_neurons, dimensions=dimensions)
