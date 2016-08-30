@@ -1,4 +1,5 @@
 import nengo
+import numpy as np
 
 
 def comm_channel(n_neurons=50, dimensions=1, seed=None):
@@ -8,7 +9,7 @@ def comm_channel(n_neurons=50, dimensions=1, seed=None):
         model.ens_b = nengo.Ensemble(
             n_neurons=n_neurons // 2, dimensions=dimensions)
 
-        model.stimulus = nengo.Node(0.5)
+        model.stimulus = nengo.Node(0.5 * np.ones(dimensions))
         nengo.Connection(model.stimulus, model.ens_a)
         nengo.Connection(model.ens_a, model.ens_b)
 
