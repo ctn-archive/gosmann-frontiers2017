@@ -1,3 +1,5 @@
+"""Circular convolution."""
+
 import matplotlib.pyplot as plt
 import nengo
 import numpy as np

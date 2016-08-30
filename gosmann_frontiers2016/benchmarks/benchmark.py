@@ -1,3 +1,5 @@
+"""General benchmarking support classes and functions."""
+
 import importlib
 import threading
 import time
@@ -9,9 +11,22 @@ from gosmann_frontiers2016 import backends
 
 
 def load_backend(backend):
+    """Loads and returns a backend."""
     return getattr(backends, backend)()
 
+
 class TimeBlock(object):
+    """Context manager to time the execution duration of a block.
+
+    Attributes
+    ----------
+    start : float
+        Start time stamp.
+    end : float
+        End time stamp.
+    duration : float
+        Duration of the execution in seconds.
+    """
     def __init__(self):
         self.start = None
         self.end = None
@@ -29,6 +44,24 @@ class TimeBlock(object):
 
 
 class RecordMemUsage(object):
+    """Context manager to record the memory usage during a code block.
+
+    Parameters
+    ----------
+    interval : float
+        Sampling interval in seconds.
+
+    Attributes
+    ----------
+    time : list
+        Relative time in seconds from start of the block when samples where
+        taken.
+    memory : list
+        Samples of memory consumption at times given in `time`.
+    event_times : list
+        Recorded event times (see `.event`).
+    """
+
     def __init__(self, interval=0.01):
         self.interval = interval
         self._start = None
@@ -46,6 +79,11 @@ class RecordMemUsage(object):
         self.memory.append(self._process.memory_info().vms)
 
     def event(self):
+        """Record time relative to start of block.
+
+        Can be used to mark specific time points in the program execution to
+        relate the memory consumption to.
+        """
         self.event_times.append(self._time())
 
     def __enter__(self):
@@ -68,6 +106,11 @@ class RecordMemUsage(object):
 
 
 class BenckmarkEnv(object):
+    """Context manager to setup Nengo bechmarking environment.
+
+    This disables the cache and progress bar to make the benchmark independent
+    of previous runs.
+    """
     def __init__(self):
         self._decoder_cache = None
         self._progress_bar = None
@@ -85,6 +128,24 @@ class BenckmarkEnv(object):
 
 
 def benchmark_time(model, backend='nengo'):
+    """Benchmarks the build, prefill, and simulation times of a model.
+
+    The prefill time is the duration for the first 10 simulation time steps in
+    which memory buffers get filled.
+
+    Parameters
+    ----------
+    model : :class:`nengo.Network`
+        Model to benchmark.
+    backend : str
+        Backend to use for the benchmark.
+
+    Returns
+    -------
+    dict
+        Dictionary with the keys ``'t_build'``, ``'t_prefill'``, and
+        ``'t_sim'`` denoting the corresponding durations.
+    """
     Simulator = load_backend(backend)
 
     with BenckmarkEnv():
@@ -107,6 +168,24 @@ def benchmark_time(model, backend='nengo'):
 
 
 def benchmark_memory(model, backend='nengo'):
+    """Benchmarks the memory consumption of a model.
+
+    Parameters
+    ----------
+    model : :class:`nengo.Network`
+        Model to benchmark.
+    backend : str
+        Backend to use for the benchmark.
+
+    Returns
+    -------
+    dict
+        Dictionary with the keys ``'time'``, ``'memory'``, and
+        ``'event_times'`` denoting the corresponding to the
+        :class:`.RecordMemUsage` attributes. Events are inserted before the
+        build, after the build (i.e., before the simulation), and after the
+        simulation.
+    """
     Simulator = load_backend(backend)
 
     with BenckmarkEnv():
