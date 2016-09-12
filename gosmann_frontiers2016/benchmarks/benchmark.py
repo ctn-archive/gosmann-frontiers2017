@@ -76,7 +76,7 @@ class RecordMemUsage(object):
 
     def _sample(self):
         self.time.append(self._time())
-        self.memory.append(self._process.memory_info().vms)
+        self.memory.append(self._process.memory_full_info().uss)
 
     def event(self):
         """Record time relative to start of block.
