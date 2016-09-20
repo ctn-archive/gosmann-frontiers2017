@@ -43,8 +43,11 @@ class SubvectorRadiusOptimizer(object):
                     n_neurons=1, dimensions=dimensions,
                     neuron_type=nengo.Direct()), **conn_kwargs)
         sim = nengo.Simulator(m)
-        self.distortion = np.mean(np.square(
-            sim.model.params[conn].solver_info['rmses']))
+        try:
+            self.distortion = np.mean(np.square(
+                sim.model.params[conn].solver_info['rmses']))
+        except TypeError:
+            self.distortion = None
 
     def find_optimal_radius(self, sp_dimensions, sp_subdimensions=1):
         """Determines the optimal radius for ensembles when splitting up a
@@ -64,6 +67,8 @@ class SubvectorRadiusOptimizer(object):
         float
             Optimal radius for the representing ensembles.
         """
+        if self.distortion is None:
+            return 1.
         import scipy.optimize
         res = scipy.optimize.minimize(
             lambda x: self.sp_subvector_error(

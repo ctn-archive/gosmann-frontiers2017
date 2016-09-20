@@ -1,3 +1,6 @@
+import nengo
+
+
 def activate_direct_mode(network):
     """Activates direct mode for a network.
 
@@ -13,10 +16,10 @@ def activate_direct_mode(network):
     requires_neurons = set()
 
     for c in network.all_connections:
-        if isinstance(c.pre, nengo.ensemble.Neurons):
-            requires_neurons.add(c.pre.ensemble)
-        if isinstance(c.post, nengo.ensemble.Neurons):
-            requires_neurons.add(c.post.ensemble)
+        if isinstance(c.pre_obj, nengo.ensemble.Neurons):
+            requires_neurons.add(c.pre_obj.ensemble)
+        if isinstance(c.post_obj, nengo.ensemble.Neurons):
+            requires_neurons.add(c.post_obj.ensemble)
     for p in network.all_probes:
         if isinstance(p.obj, nengo.ensemble.Neurons):
             requires_neurons.add(p.obj.ensemble)
