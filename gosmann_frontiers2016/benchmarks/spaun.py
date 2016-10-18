@@ -15,6 +15,15 @@ from gosmann_frontiers2016._spaun.modules.motor.data import mtr_data
 from gosmann_frontiers2016._spaun.modules.vision.data import vis_data
 
 
+def make_finite(fn):
+    def finite(*args, **kwargs):
+        values = fn(*args, **kwargs)
+        if not np.all(np.isfinite(values)):
+            values = np.zeros_like(values)
+        return values
+    return finite
+
+
 def spaun():
     def_seq = 'A3[123]?XXXX'
     cfg.set_seed(1)
@@ -24,7 +33,14 @@ def spaun():
     vocab.initialize(experiment.num_learn_actions, cfg.rng)
     vocab.initialize_mtr_vocab(mtr_data.dimensions, mtr_data.sps)
     vocab.initialize_vis_vocab(vis_data.dimensions, vis_data.sps)
-    return Spaun()
+    model = Spaun()
+    for node in model.all_nodes:
+        if callable(node.output):
+            node.output = make_finite(node.output)
+    for conn in model.all_connections:
+        if callable(conn.function):
+            conn.function = make_finite(conn.function)
+    return model
 
 
 if __name__ == '__main__':
