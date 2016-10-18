@@ -20,6 +20,11 @@ def activate_direct_mode(network):
             requires_neurons.add(c.pre_obj.ensemble)
         if isinstance(c.post_obj, nengo.ensemble.Neurons):
             requires_neurons.add(c.post_obj.ensemble)
+        if c.learning_rule_type is not None:
+            if c.learning_rule_type.modifies in ('encoders', 'weights'):
+                requires_neurons.add(c.post_obj)
+            elif c.learning_rule_type.modifies in ('decoders', 'weights'):
+                requires_neurons.add(c.pre_obj)
     for p in network.all_probes:
         if isinstance(p.obj, nengo.ensemble.Neurons):
             requires_neurons.add(p.obj.ensemble)
