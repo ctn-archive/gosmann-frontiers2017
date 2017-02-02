@@ -16,7 +16,7 @@ _nback_seq = 'SRVSLVVRHPWWMPWMBGVBLFPLFSLRKMMTNMTKMMKMBBSZBPKB'
 SIM_DURATION = _trial_duration * len(_nback_seq) + 0.01
 
 
-def nback(sd=1):
+def nback(sd=16):
     symbols = ['BCDFGHJKLMNPQRSTVWXZ']
     n = 3
     d = 64
