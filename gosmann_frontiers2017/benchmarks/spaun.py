@@ -18,8 +18,14 @@ from gosmann_frontiers2017._spaun.modules.vision.data import vis_data
 def make_finite(fn):
     def finite(*args, **kwargs):
         values = fn(*args, **kwargs)
-        if not np.all(np.isfinite(values)):
-            values = np.zeros_like(values)
+        try:
+            if values is None:
+                return 1.
+            elif not np.all(np.isfinite(values)):
+                values = np.ones_like(values)
+            np.clip(values, 1., 1e5, out=values)
+        except:
+            pass
         return values
     return finite
 
