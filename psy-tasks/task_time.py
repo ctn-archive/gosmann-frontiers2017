@@ -4,7 +4,7 @@ import nengo
 import numpy as np
 from psyrun import Param
 
-from gosmann_frontiers2016.benchmarks.benchmark import benchmark_time
+from gosmann_frontiers2017.benchmarks.benchmark import benchmark_time
 
 
 pspace = (
@@ -28,7 +28,7 @@ max_jobs = None
 
 def execute(model, backend, neuron_type, trial, **kwargs):
     kwargs = {k: v for k, v in kwargs.items() if np.isfinite(v)}
-    mod = importlib.import_module('gosmann_frontiers2016.benchmarks.' + model)
+    mod = importlib.import_module('gosmann_frontiers2017.benchmarks.' + model)
     with nengo.Config(nengo.Ensemble) as cfg:
         cfg[nengo.Ensemble].neuron_type = getattr(nengo.neurons, neuron_type)()
         model = getattr(mod, model)(**kwargs)

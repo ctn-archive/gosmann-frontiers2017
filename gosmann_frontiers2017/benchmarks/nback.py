@@ -7,8 +7,8 @@ except:
 import nengo
 import numpy as np
 
-import gosmann_frontiers2016.spaopt as spa
-from gosmann_frontiers2016.spaopt import CircularConvolution
+import gosmann_frontiers2017.spaopt as spa
+from gosmann_frontiers2017.spaopt import CircularConvolution
 
 
 _trial_duration = 2.5

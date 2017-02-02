@@ -4,7 +4,7 @@ import nengo
 import nengo_ocl
 import pyopencl as cl
 
-import gosmann_frontiers2016.optimized.simulator as optsim
+import gosmann_frontiers2017.optimized.simulator as optsim
 
 
 def get_devices(device_type):

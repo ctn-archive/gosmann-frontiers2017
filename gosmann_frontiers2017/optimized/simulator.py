@@ -19,7 +19,7 @@ from nengo.utils.graphs import toposort
 from nengo.utils.progress import ProgressTracker
 from nengo.utils.simulator import operator_depencency_graph
 
-from gosmann_frontiers2016.optimized.optimizer import OpMergeOptimizer
+from gosmann_frontiers2017.optimized.optimizer import OpMergeOptimizer
 
 logger = logging.getLogger(__name__)
 

@@ -7,12 +7,12 @@ except:
 import nengo
 import numpy as np
 
-from gosmann_frontiers2016._spaun.configurator import cfg
-from gosmann_frontiers2016._spaun.experimenter import experiment
-from gosmann_frontiers2016._spaun.spaun_main import Spaun
-from gosmann_frontiers2016._spaun.vocabulator import vocab
-from gosmann_frontiers2016._spaun.modules.motor.data import mtr_data
-from gosmann_frontiers2016._spaun.modules.vision.data import vis_data
+from gosmann_frontiers2017._spaun.configurator import cfg
+from gosmann_frontiers2017._spaun.experimenter import experiment
+from gosmann_frontiers2017._spaun.spaun_main import Spaun
+from gosmann_frontiers2017._spaun.vocabulator import vocab
+from gosmann_frontiers2017._spaun.modules.motor.data import mtr_data
+from gosmann_frontiers2017._spaun.modules.vision.data import vis_data
 
 
 def make_finite(fn):

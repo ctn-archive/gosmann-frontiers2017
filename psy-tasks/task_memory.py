@@ -3,7 +3,7 @@ import importlib
 import numpy as np
 from psyrun import Param
 
-from gosmann_frontiers2016.benchmarks.benchmark import benchmark_memory
+from gosmann_frontiers2017.benchmarks.benchmark import benchmark_memory
 
 
 pspace = (
@@ -20,6 +20,6 @@ max_jobs = None
 
 def execute(model, backend, trial, **kwargs):
     kwargs = {k: v for k, v in kwargs.items() if np.isfinite(v)}
-    mod = importlib.import_module('gosmann_frontiers2016.benchmarks.' + model)
+    mod = importlib.import_module('gosmann_frontiers2017.benchmarks.' + model)
     model = getattr(mod, model)(**kwargs)
     return benchmark_memory(model, backend)

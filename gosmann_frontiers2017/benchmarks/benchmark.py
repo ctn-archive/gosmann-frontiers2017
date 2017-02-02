@@ -7,7 +7,7 @@ import time
 from nengo.rc import rc
 import psutil
 
-from gosmann_frontiers2016 import backends
+from gosmann_frontiers2017 import backends
 
 
 def load_backend(backend):
