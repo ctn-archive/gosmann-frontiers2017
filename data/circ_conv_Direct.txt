@@ -1,0 +1,6 @@
+[INFO] Running OpMergeOptimizer ...
+[INFO] Pass 1 [only views]: Reduced 375 to 309 operators in 0.045230s.
+[INFO] Pass 2 [only views]: Reduced 309 to 243 operators in 0.039026s.
+[INFO] Pass 3 [only views]: Reduced 243 to 221 operators in 0.027107s.
+[INFO] Pass 4 [only views]: Reduced 221 to 221 operators in 0.023212s.
+[INFO] Pass 5 [all]: Reduced 221 to 221 operators in 0.020896s.
