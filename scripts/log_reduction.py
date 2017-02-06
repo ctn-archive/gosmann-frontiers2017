@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument(
         'model', nargs=1, type=str,
         help="One of the models to be imported "
-        "from gosmann_frontiers2016.benchmarks.")
+        "from gosmann_frontiers2017.benchmarks.")
     parser.add_argument(
         '--neuron-type', nargs=1, type=str, default=['LIF'],
         help="Neuron type to use.")
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     mod = importlib.import_module(
-        'gosmann_frontiers2016.benchmarks.' + args.model[0])
+        'gosmann_frontiers2017.benchmarks.' + args.model[0])
 
     with nengo.Config(nengo.Ensemble) as cfg:
         if args.neuron_type[0] != 'Direct':
