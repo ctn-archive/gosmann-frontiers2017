@@ -1,10 +1,9 @@
 import importlib
 
-import nengo
 import numpy as np
 from psyrun import Param
 
-from gosmann_frontiers2016.benchmarks.benchmark import benchmark_memory
+from gosmann_frontiers2017.benchmarks.benchmark import benchmark_memory
 
 
 pspace = Param(model=['spaun'])

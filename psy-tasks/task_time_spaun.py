@@ -4,8 +4,8 @@ import nengo
 import numpy as np
 from psyrun import Param
 
-from gosmann_frontiers2016.utils import activate_direct_mode
-from gosmann_frontiers2016.benchmarks.benchmark import benchmark_time
+from gosmann_frontiers2017.utils import activate_direct_mode
+from gosmann_frontiers2017.benchmarks.benchmark import benchmark_time
 
 
 pspace = Param(model=['spaun'])
