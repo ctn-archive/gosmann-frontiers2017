@@ -1,7 +1,5 @@
 from setuptools import find_packages, setup
 
-print(find_packages() + [
-        'gosmann_frontiers2017.' + p for p in find_packages('spaun2.0')])
 
 setup(
     name="gosmann_frontiers2017",
@@ -16,4 +14,11 @@ setup(
             '*.npz', '*.gz', '*.pkl'],
         'gosmann_frontiers2017._spaun.modules.motor': [
             '*.npz', '*.gz', '*.pkl']},
+    install_requires=[
+        'nengo >= 2.1.2',
+        'nengo_ocl >= 1.0.0',
+        'numpy>=1.10',
+        'psutil',
+        'scipy',
+    ],
 )
