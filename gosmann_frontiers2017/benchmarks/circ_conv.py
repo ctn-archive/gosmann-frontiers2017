@@ -1,6 +1,5 @@
 """Circular convolution."""
 
-import matplotlib.pyplot as plt
 import nengo
 import numpy as np
 
@@ -26,6 +25,8 @@ def circ_conv(n_neurons=200, dimensions=4, seed=None):
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
     model = circ_conv()
     with nengo.Simulator(model) as sim:
         sim.run(1.)

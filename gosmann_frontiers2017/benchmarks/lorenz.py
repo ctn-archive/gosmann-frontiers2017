@@ -1,7 +1,5 @@
 """Lorenz attractor."""
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import nengo
 
 
@@ -31,6 +29,9 @@ def lorenz(n_neurons=2000, seed=None):
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+
     model = lorenz()
     with nengo.Simulator(model) as sim:
         sim.run(6.)
