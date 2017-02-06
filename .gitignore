@@ -1,4 +1,6 @@
 figures
+data/memory.npz
+data/memory_spaun.npz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
