@@ -137,7 +137,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
     n is the number of operators and e the number of edges in the dependency
     graph. In practice the run time will be much better because not all n^2
     pairwise combinations of operators will be evaluated. A grouping depending
-    on the operator type and view bases will be done with dictionaries. This
+    on the operator type and view bases is done with dictionaries. This
     grouping can be done in amortized linear time and reduces the actual worst
     case runtime of the optimization algorithm to O(g*m^2 + e) where g is the
     number of groups and m the number of elements in a group. Moreover,
@@ -151,8 +151,8 @@ class OpMergeOptimizer(SupportDefaultsMixin):
     model : :class:`nengo.builder.builder.Model`
         Builder output to optimize.
     dg : dict
-        Dict of the form {a: {b, c}} where b and c depend on a specifying the
-        operator dependency graph of the model.
+        Dict of the form ``{a: {b, c}}`` where ``b`` and ``c`` depend on a
+        specifying the operator dependency graph of the model.
     """
 
     op_mergers = {}
@@ -167,10 +167,9 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         self.model = model
         self.dg = dg
 
-        # Internal dict mapping Signals to Operators accessing those signals.
+        # Dict mapping from a Signal to the Operators accessing those signals.
         self._sig2op = None
-        # Internal set of Operators merged during the current optimization
-        # pass.
+        # Set of Operators merged during the current optimization pass.
         self._merged = None
 
     @classmethod
@@ -185,8 +184,12 @@ class OpMergeOptimizer(SupportDefaultsMixin):
             cls.op_mergers[type(op1)].can_merge(op1, op2))
 
     @classmethod
+    def get_merger(cls, op):
+        return cls.op_mergers[type(op)]
+
+    @classmethod
     def merge_ops(cls, ops):
-        return cls.op_mergers[type(ops[0])].merge(ops)
+        return cls.get_merger(ops[0]).merge(ops)
 
     @classmethod
     def register_merger(cls, op_type):
@@ -310,14 +313,16 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         # graph and signals have been updated with those merges to continue
         # merging other operator types.
 
-        # Heuristic order to reduce runtime and number of passes
+        # First loop with a heuristic order to reduce runtime and number of
+        # passes
         for tp in [ElementwiseInc, SlicedCopy, DotInc, SimNeurons]:
             opr, sigr = self._perform_merges_for_subset(
                 by_type[tp], tc, only_merge_ops_with_view)
             op_replacements.update(opr)
             sig_replacements.update(sigr)
             del by_type[tp]  # no need to process tp again in the second loop
-            if not only_merge_ops_with_view and len(opr) > 0:
+            has_changes = any(new is not old for old, new in iteritems(opr))
+            if not only_merge_ops_with_view and has_changes:
                 # If we're not only merging views, the memory layout changes
                 # and non-views are turned into views. In that case we need
                 # to update the signals the operators are referring to before
@@ -329,17 +334,19 @@ class OpMergeOptimizer(SupportDefaultsMixin):
 
         # Process remaining operations
         for tp, subset in by_type.items():
-            if self.supports_merge(tp) and (
-                    only_merge_ops_with_view or len(opr) <= 0):
-                opr, sigr = self._perform_merges_for_subset(
-                    subset, tc, only_merge_ops_with_view)
-                op_replacements.update(opr)
-                sig_replacements.update(sigr)
-            else:
+            if not self.supports_merge(tp) or (
+                    not only_merge_ops_with_view and has_changes):
                 # If an operator type does not support merging we still need to
                 # add the operators to op_replacements to not have them removed
                 # from the dependency graph.
                 op_replacements.update({op: op for op in subset})
+            else:
+                opr, sigr = self._perform_merges_for_subset(
+                    subset, tc, only_merge_ops_with_view)
+                op_replacements.update(opr)
+                sig_replacements.update(sigr)
+                has_changes = any(
+                    new is not old for old, new in iteritems(opr))
 
         sig_replacements.update(self._get_sig_view_replacements(
             op_replacements.values(), sig_replacements))
@@ -360,15 +367,6 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         signals corresponding to `op1_view_indices` are views. `tc` needs to be
         the transitive closure of the dependency graph.
         """
-        # Ensure the operators don't form a dependency cycle and that op2
-        # hasn't been merged with another operator yet. (Whether op1 has been
-        # merged with another operator will be checked outside of this function
-        # to reduce the number of checks inside the inner loop of the
-        # optimizer.)
-        independent = (
-            (op1 not in tc[op2] and op2 not in tc[op1]) and
-            op2 not in self._merged)
-
         op1_sigs = op1.all_signals
         op2_sigs = op2.all_signals
 
@@ -382,7 +380,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
             views_match &= s1.base == s2.base
             views_match &= s1.strides == s2.strides
 
-        return independent and views_match and self.can_merge_ops(op1, op2)
+        return views_match and self.can_merge_ops(op1, op2)
 
     def _is_memory_access_sequential(self, ops):
         """Checks that the corresponding signals of the operators `ops` are all
@@ -402,7 +400,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         return True
 
     @staticmethod
-    def _view_offset(op):
+    def _first_view_offset(op):
         """Returns the offset of the first signal view of operator `op`.
 
         Returns 0 if the operator has no signal views."""
@@ -412,7 +410,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         return 0
 
     @staticmethod
-    def _view_size(op):
+    def _first_view_size(op):
         """Returns the size of the first signal view of operator `op`.
 
         Returns 0 if the operator has no signal views."""
@@ -422,7 +420,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         return 0
 
     @staticmethod
-    def _view_base(op):
+    def _first_view_base(op):
         """Returns the base of the first signal view of operator `op`.
 
         Returns ``None`` if the operator has no signal views."""
@@ -453,8 +451,8 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         the views match up in their memory alignment.
         """
         return (
-            self._view_offset(op1) + self._view_size(op1) <
-            self._view_offset(op2))
+            self._first_view_offset(op1) + self._first_view_size(op1) <
+            self._first_view_offset(op2))
 
     def _perform_merges_for_subset(
             self, subset, tc, only_merge_ops_with_view=True):
@@ -485,7 +483,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
 
         # Sort by base of views
         for op in subset:
-            by_view[self._view_base(op)].append(op)
+            by_view[self._first_view_base(op)].append(op)
 
         if only_merge_ops_with_view and None in by_view:
             del by_view[None]
@@ -522,7 +520,7 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         """
         view_indices = []
         # Sort to have sequential memory.
-        offsets = np.array([self._view_offset(op) for op in subset])
+        offsets = np.array([self._first_view_offset(op) for op in subset])
         sort_indices = np.argsort(offsets)
         offsets = offsets[sort_indices]
         sorted_subset = [subset[i] for i in sort_indices]
@@ -530,26 +528,43 @@ class OpMergeOptimizer(SupportDefaultsMixin):
         for i, op1 in enumerate(sorted_subset):
             if op1 in self._merged:
                 # Cannot merge merged operator again until dependency graph
-                # has been updated (happens outside of this function).
+                # has been updated (happens at the end of one optimization
+                # pass by calling _update_dg).
+                continue
+            if any(op1 in tc[op] or op in tc[op1] for op in self._merged):
                 continue
 
             view_indices = self._get_view_indices(op1)
 
             # Find operators that can be merged.
             merge = [op1]
+            merge_tc = set(tc[op1])
+            merge_signals = set(op1.all_signals)
             # For a merge to be possible the view of the next operator has to
             # start where the view of op1 ends. Because we have sorted the
             # operators by the start of their views we can do a binary search
             # and potentially skip a number of operators at the beginning.
             start = np.searchsorted(
-                offsets, offsets[i] + self._view_size(op1), side='left')
+                offsets, offsets[i] + self._first_view_size(op1), side='left')
             for op2 in sorted_subset[start:]:
-                can_merge = (
+                independent_of_merge_ops = (
+                    op2 not in merge_tc and
+                    len(tc[op2].intersection(merge)) <= 0 and
+                    self.get_merger(op2).check_for_signal_conflicts(
+                        op2, merge, merge_signals))
+                independent_of_prior_merges = (
                     op2 not in self._merged and
+                    not any(op2 in tc[op] or op in tc[op2]
+                            for op in self._merged))
+                can_merge = (
+                    independent_of_merge_ops and
+                    independent_of_prior_merges and
                     self._mergeable(merge[-1], op2, view_indices, tc) and
                     self._is_memory_access_sequential([merge[-1], op2]))
                 if can_merge:
                     merge.append(op2)
+                    merge_tc.update(tc[op2])
+                    merge_signals.update(op2.all_signals)
                 elif self._check_sequential(merge[-1], op2):
                     # If this check is true the view of op2 does not
                     # immediately follow the view of the operators being
@@ -656,6 +671,9 @@ class OpMergeOptimizer(SupportDefaultsMixin):
                     readonly=s.readonly)
             return s
 
+        # This call is not actually changing the signals of the operators as
+        # get_sig_view_replacement will return the unmodified signals and
+        # store additional required replacements in view_replacements.
         cls._map_onto_op_signals(get_sig_view_replacement, ops)
         return view_replacements
 
@@ -704,6 +722,30 @@ class AbstractMerger(object):
             signals of other operators.
         """
         raise NotImplementedError()
+
+    def check_for_signal_conflicts(self, op, merge, merge_signals):
+        """Check if `op` can be appended to a merge given its signals.
+
+        By default this will check that op does not share a signal with an
+        operator in the planned merged. Deriving classes may overwrite this
+        function to allow shared signals in specific circumstances.
+
+        Parameters
+        ----------
+        op : Operator
+            Operator that is considered for addition to the merge
+        merge : list of Operator
+            The list of operators that will be merged.
+        merge_signals : set of Signal
+            A set of all signals referenced by the operators in `merge`.
+
+        Returns
+        -------
+        bool
+            Whether `op` may be added to `merge` considering the identity of
+            its signals.
+        """
+        return len(merge_signals.intersection(op.all_signals)) <= 0
 
 
 @OpMergeOptimizer.register_merger(operator.TimeUpdate)
@@ -825,6 +867,8 @@ class DotIncMerger(AbstractMerger):
             A = merge_signals_or_views([o.A for o in ops], replacements)
             Y = merge_signals_or_views([o.Y for o in ops], replacements)
             return operator.DotInc(A, ops[0].X, Y), replacements
+        assert all(
+            o1.X is not o2.X for i, o1 in enumerate(ops) for o2 in ops[i+1:])
 
         # BSR merge if X differ
         X = merge_signals_or_views([o.X for o in ops], replacements)
@@ -832,6 +876,10 @@ class DotIncMerger(AbstractMerger):
 
         # Construct sparse A representation
         data = np.array([o.A.initial_value for o in ops])
+        if data.ndim == 1:
+            data = data.reshape((data.size, 1, 1))
+        elif data.ndim == 2:
+            data = data.reshape(data.shape + (1,))
         indptr = np.arange(len(ops) + 1, dtype=int)
         indices = np.arange(len(ops), dtype=int)
         name = 'bsr_merged<{first}, ..., {last}>'.format(
@@ -842,15 +890,27 @@ class DotIncMerger(AbstractMerger):
             replacements[s] = Signal(
                 data[i], name="%s[%i]" % (s.name, i), base=A)
             assert np.all(s.initial_value == replacements[s].initial_value)
-            assert s.shape == replacements[s].shape
+            assert s.shape == replacements[s].shape or (
+                s.shape == () and replacements[s].shape == (1, 1))
 
         reshape = operator.reshape_dot(
             ops[0].A.initial_value, ops[0].X.initial_value,
             ops[0].Y.initial_value, tag=ops[0].tag)
         return (
-            BsrDotInc(
+            operator.BsrDotInc(
                 A, X, Y, indices=indices, indptr=indptr, reshape=reshape),
             replacements)
+
+    def check_for_signal_conflicts(self, op, merge, merge_signals):
+        none_shared = (
+            super(DotIncMerger, self).check_for_signal_conflicts(
+                op, merge, merge_signals) and
+            len(set(o.X for o in merge)) == len(merge))
+        all_x_shared = (
+            not any(set((op.X, op.A, op.Y)).intersection((o.A, o.Y))
+                    for o in merge) and
+            all(op.X is o.X for o in merge))
+        return none_shared or all_x_shared
 
 
 @OpMergeOptimizer.register_merger(SimNeurons)
