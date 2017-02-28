@@ -209,6 +209,7 @@ class OpMergePass(object):
         self.sig2ops = defaultdict(list)
         self.base2views = defaultdict(list)
         self.merged = set()
+        self.merged_tc = set()
         self.opinfo = OpInfo()
 
         # These variables will be initialized and used on each pass
@@ -231,6 +232,7 @@ class OpMergePass(object):
         self.op_replacements.clear()
         self.sig_replacements.clear()
         self.merged.clear()
+        self.merged_tc.clear()
         self.sig2ops.clear()
         self.opinfo.clear()
 
@@ -329,11 +331,11 @@ class OpMergePass(object):
                 # has been updated
                 continue
 
-            if any(op1 in self.dependents[op] or op in self.dependents[op1]
-                   for op in self.merged):
+            if op1 in self.merged_tc or any(
+                    op in self.merged for op in self.dependents[op1]):
                 continue
 
-            tomerge = OpsToMerge(op1, self.merged, self.dependents)
+            tomerge = OpsToMerge(op1, self.merged, self.merged_tc, self.dependents)
 
             # For a merge to be possible the view of the next operator has to
             # start where the view of op1 ends. Because we have sorted the
@@ -358,9 +360,9 @@ class OpMergePass(object):
                     tomerge.add(op2)
 
             if len(tomerge.ops) > 1:
-                self.merge(tomerge.ops)
+                self.merge(tomerge)
 
-    def merge(self, ops):
+    def merge(self, m):
         """Merges the given operators.
 
         This method will also update ``op_replacements``, ``sig_replacements``,
@@ -368,9 +370,10 @@ class OpMergePass(object):
         on the same operators before all required operators and signals have
         been replaced.
         """
-        merged_op, merged_sig = OpMerger.merge(ops)
-        self.merged.update(ops)
-        for op in ops:
+        merged_op, merged_sig = OpMerger.merge(m.ops)
+        self.merged.update(m.ops)
+        self.merged_tc.update(m.all_dependents)
+        for op in m.ops:
             self.op_replacements[op] = merged_op
             # Mark all operators referencing the same signals as merged
             # (even though they are not) to prevent them from getting
@@ -479,8 +482,9 @@ class OpInfo(Mapping):
 class OpsToMerge(object):
     """Analyze and store extra information about a list of ops to be merged."""
 
-    def __init__(self, initial_op, merged, dependents):
+    def __init__(self, initial_op, merged, merged_tc, dependents):
         self.merged = merged
+        self.merged_tc = merged_tc
         self.dependents = dependents
         self.ops = [initial_op]
         self.optype = type(initial_op)
@@ -535,8 +539,8 @@ class OpMerger(object):
             len(tomerge.dependents[op].intersection(tomerge.ops)) == 0)
         independent_of_prior_merges = (
             op not in tomerge.merged and
-            all(op not in tomerge.dependents[o] and
-                o not in tomerge.dependents[op] for o in tomerge.merged))
+            op not in tomerge.merged_tc and
+            all(o not in tomerge.merged for o in tomerge.dependents[op]))
         return (
             type(op) is tomerge.optype and
             independent_of_ops_tomerge and
