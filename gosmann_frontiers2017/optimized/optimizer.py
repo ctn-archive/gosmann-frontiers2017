@@ -456,7 +456,7 @@ class OpInfo(Mapping):
                 first_view = next(s for s in op.all_signals if s.is_view)
                 self.info[op] = self._OpDetails(first_view=first_view,
                                                 v_offset=first_view.offset,
-                                                v_size=first_view.nbytes,
+                                                v_size=first_view.initial_view.nbytes,
                                                 v_base=first_view.base)
             except StopIteration:
                 self.info[op] = self._OpDetails(
@@ -893,7 +893,7 @@ class SigMerger(object):
                     "axis.")
             if s.offset != start:
                 raise ValueError("Views are not sequential.")
-            start = s.offset + s.nbytes
+            start = s.offset + s.initial_view.nbytes
 
     @staticmethod
     def merge(signals, axis=0):
