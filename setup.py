@@ -15,10 +15,12 @@ setup(
         'gosmann_frontiers2017._spaun.modules.motor': [
             '*.npz', '*.gz', '*.pkl']},
     install_requires=[
-        'nengo >= 2.1.2',
+        'matplotlib',
+        'nengo >= 2.1.2, <2.3',
         'nengo_ocl >= 1.0.0',
         'numpy>=1.10',
         'psutil',
+        'psyrun',
         'scipy',
     ],
 )
