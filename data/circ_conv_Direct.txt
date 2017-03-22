@@ -1,6 +1,13 @@
-[INFO] Running OpMergeOptimizer ...
-[INFO] Pass 1 [only views]: Reduced 375 to 309 operators in 0.045230s.
-[INFO] Pass 2 [only views]: Reduced 309 to 243 operators in 0.039026s.
-[INFO] Pass 3 [only views]: Reduced 243 to 221 operators in 0.027107s.
-[INFO] Pass 4 [only views]: Reduced 221 to 221 operators in 0.023212s.
-[INFO] Pass 5 [all]: Reduced 221 to 221 operators in 0.020896s.
+[INFO] Optimizing model...
+[INFO] Pass 1 [views]: Reduced 26167 to 24161 operators in 8.482424s.
+[INFO] Pass 2 [views]: Reduced 24161 to 20149 operators in 16.652663s.
+[INFO] Pass 3 [views]: Reduced 20149 to 16137 operators in 15.533320s.
+[INFO] Pass 4 [views]: Reduced 16137 to 12125 operators in 14.220873s.
+[INFO] Pass 5 [views]: Reduced 12125 to 12125 operators in 0.213684s.
+[INFO] Pass 6 [non-views]: Reduced 12125 to 10118 operators in 14.317955s.
+[INFO] Pass 7 [views]: Reduced 10118 to 10066 operators in 5.280533s.
+[INFO] Pass 8 [views]: Reduced 10066 to 6052 operators in 29.898563s.
+[INFO] Pass 9 [views]: Reduced 6052 to 6052 operators in 1.947814s.
+[INFO] Pass 10 [non-views]: Reduced 6052 to 6024 operators in 2.446970s.
+[INFO] Pass 11 [views]: Reduced 6024 to 6023 operators in 1.832978s.
+[INFO] Operator reduction rate fell below 0.01 mean reduction rate. Stopping optimizer.
