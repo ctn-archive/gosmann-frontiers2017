@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="gosmann_frontiers2017",
-    version="1.0",
+    version="1.1",
     author="Jan Gosmann",
     author_email="jgosmann@uwaterloo.ca",
     packages=find_packages() + [
