@@ -4,7 +4,12 @@ import nengo
 import numpy as np
 
 
-def circ_conv(n_neurons=200, dimensions=4, seed=None):
+def circ_conv(n_neurons=500, dimensions=500, seed=None):
+    n_neurons = int(n_neurons)
+    dimensions = int(dimensions)
+    if seed is not None:
+        seed = int(seed)
+
     with nengo.Network(seed=seed, label="Circular convolution") as model:
         v = np.random.randn(2, dimensions)
         v /= np.linalg.norm(v, axis=1)[:, None]

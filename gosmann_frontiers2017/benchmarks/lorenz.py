@@ -4,6 +4,10 @@ import nengo
 
 
 def lorenz(n_neurons=2000, seed=None):
+    n_neurons = int(n_neurons)
+    if seed is not None:
+        seed = int(seed)
+
     tau = 0.1
     sigma = 10.
     beta = 8. / 3.

@@ -1,11 +1,15 @@
 """Communication channel."""
 
-import matplotlib.pyplot as plt
 import nengo
 import numpy as np
 
 
 def comm_channel(n_neurons=50, dimensions=1, seed=None):
+    n_neurons = int(n_neurons)
+    dimensions = int(dimensions)
+    if seed is not None:
+        seed = int(seed)
+
     with nengo.Network(seed=seed, label="Communication channel") as model:
         model.ens_a = nengo.Ensemble(
             n_neurons=n_neurons // 2, dimensions=dimensions)

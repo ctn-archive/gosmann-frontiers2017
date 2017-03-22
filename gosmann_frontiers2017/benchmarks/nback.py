@@ -17,6 +17,8 @@ SIM_DURATION = _trial_duration * len(_nback_seq) + 0.01
 
 
 def nback(sd=16):
+    sd = int(sd)
+
     symbols = ['BCDFGHJKLMNPQRSTVWXZ']
     n = 3
     d = 64

@@ -23,10 +23,10 @@ def execute(model, backend, neuron_type, trial, **kwargs):
     kwargs = {k: v for k, v in kwargs.items() if np.isfinite(v)}
     mod = importlib.import_module('gosmann_frontiers2017.benchmarks.' + model)
     with nengo.Config(nengo.Ensemble) as cfg:
-        if neuron_type is not 'Direct':
+        if neuron_type != 'Direct':
             cfg[nengo.Ensemble].neuron_type = getattr(
                 nengo.neurons, neuron_type)()
         model = getattr(mod, model)(**kwargs)
-    if neuron_type is 'Direct':
+    if neuron_type == 'Direct':
         activate_direct_mode(model)
     return benchmark_time(model, backend)
