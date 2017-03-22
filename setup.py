@@ -20,7 +20,7 @@ setup(
         'nengo_ocl >= 1.0.0',
         'numpy>=1.10',
         'psutil',
-        'psyrun',
+        'psyrun>=0.5.3',
         'scipy',
     ],
 )
