@@ -1,9 +1,12 @@
 """Operator graph optimizers."""
 
+import collections
 from collections import defaultdict, Mapping, namedtuple
 import logging
 from itertools import zip_longest
+import time
 import warnings
+import weakref
 
 import numpy as np
 
@@ -13,34 +16,60 @@ from nengo.builder.operator import DotInc, ElementwiseInc, SlicedCopy, Operator
 from nengo.builder.signal import Signal
 from nengo.exceptions import NengoException
 from nengo.utils.compat import iteritems, itervalues
-from nengo.utils.graphs import toposort
 from nengo.utils.stdlib import Timer
 
 logger = logging.getLogger(__name__)
 
 
-class BuildError(NengoException, ValueError):
-    """A ValueError encountered during the build process."""
+def toposort(edges):
+    """Topological sort algorithm by Kahn[1]
 
-
-def transitive_closure(edges, topo_sorted=None):
-    """Constructs the transitive_closure of a DAG.
-
-    The complexity is O(nodes + vertices).
+    Complexity is O(nodes + vertices).
 
     Parameters
     ----------
     edges : dict
-        Dict of the form {a: {b, c}} where b and c depend on a. Must not
-        contain cycles.
-    topo_sorted : sequence, optional
-        The topological sorting of the vertices. If not passed in the algorithm
-        will do a topological sort.
+        Dict of the form {a: {b, c}} where b and c depend on a
 
     Returns
     -------
-    The transitive closure data structure as `edges`.
+    An ordered list of nodes that satisfy the dependencies of ``edges``
+
+    Example
+    -------
+    >>> toposort({1: {2, 3}, 2: {3}, 3: set()})
+    [1, 2, 3]
+
+    Notes
+    -----
+    Closely follows the wikipedia page [2]
+    [1] Kahn, Arthur B. (1962), "Topological sorting of large networks",
+    Communications of the ACM
+    [2] http://en.wikipedia.org/wiki/Toposort#Algorithms
     """
+    incoming_edges = reverse_edges(edges)
+    incoming_edges = {k: set(val) for k, val in iteritems(incoming_edges)}
+    vertices = {v for v in edges
+                if v not in incoming_edges or not incoming_edges[v]}
+    ordered = []
+
+    while vertices:
+        n = vertices.pop()
+        ordered.append(n)
+        for m in edges.get(n, ()):
+            assert n in incoming_edges[m]
+            incoming_edges[m].remove(n)
+            if not incoming_edges[m]:
+                vertices.add(m)
+    if any(incoming_edges.get(v, None) for v in edges):
+        raise BuildError(
+            "Input graph has cycles. This usually occurs because "
+            "too many connections have no synapses. Try setting "
+            "more synapses to '0' instead of 'None'.")
+    return ordered
+
+
+def transitive_closure(edges, topo_sorted=None):
     if topo_sorted is None:
         topo_sorted = toposort(edges)
 
@@ -49,7 +78,8 @@ def transitive_closure(edges, topo_sorted=None):
     for vertex in reversed(topo_sorted):
         reachables[vertex] = set(edges[vertex])
         for edge in edges[vertex]:
-            reachables[vertex].update(reachables[edge])
+            if edge in reachables:
+                reachables[vertex].update(reachables[edge])
         reachables[vertex] = frozenset(reachables[vertex])
 
         # We try to reuse existing sets as this can significantly reduce
@@ -58,6 +88,121 @@ def transitive_closure(edges, topo_sorted=None):
             reachables[vertex] = sets[reachables[vertex]]
         sets[reachables[vertex]] = reachables[vertex]
     return reachables
+
+
+class BidirectionalDAG(object):
+    """Directed acyclic graph supporting bidirectional traversal.
+    Parameters
+    ----------
+    forward : dict
+        Forward edges for each vertex in the form
+        {1: {2, 3}, 2: {3}, 3: set()}.
+    Attributes
+    ----------
+    forward : dict
+        Maps vertices to edges in forward direction.
+    backward : dict
+        Maps vertices to edges in backward direction.
+    """
+
+    def __init__(self, forward):
+        self.forward = forward
+        self.backward = reverse_edges(forward)
+
+    def merge(self, vertices, merged_vertex):
+        """Merges vertices in the graph.
+        Parameters
+        ----------
+        vertices : set
+            Vertices that are being merged.
+        merged_vertex
+            The vertex that replaces *vertices*.
+        """
+
+        forward_edges = set()
+        for v in vertices:
+            forward_edges.update(self.forward[v])
+            del self.forward[v]
+        self.forward[merged_vertex] = forward_edges
+
+        backward_edges = set()
+        for v in vertices:
+            backward_edges.update(self.backward[v])
+            del self.backward[v]
+        self.backward[merged_vertex] = backward_edges
+
+        for e in forward_edges:
+            self.backward[e].difference_update(vertices)
+            self.backward[e].add(merged_vertex)
+
+        for e in backward_edges:
+            self.forward[e].difference_update(vertices)
+            self.forward[e].add(merged_vertex)
+
+
+class WeakKeyDefaultDict(collections.MutableMapping):
+    """WeakKeyDictionary that allows to define a default."""
+
+    def __init__(self, default_factory, items=None, **kwargs):
+        self.default_factory = default_factory
+        self._data = weakref.WeakKeyDictionary(items, **kwargs)
+
+    def __contains__(self, key):
+        return key in self._data
+
+    def __getitem__(self, key):
+        if key not in self._data:
+            self._data[key] = self.default_factory()
+        return self._data[key]
+
+    def __setitem__(self, key, value):
+        self._data[key] = value
+
+    def __delitem__(self, key):
+        del self._data[key]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+
+class WeakSet(collections.MutableSet):
+    """Uses weak references to store the items in the set."""
+
+    def __init__(self, items=None):
+        self._data = weakref.WeakKeyDictionary()
+        if items is not None:
+            self |= items
+
+    def __contains__(self, key):
+        return key in self._data
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+    def add(self, key):
+        self._data[key] = None
+
+    def discard(self, key):
+        if key in self._data:
+            del self._data[key]
+
+
+class BuildError(NengoException, ValueError):
+    """A ValueError encountered during the build process."""
+
+
+def reverse_edges(edges):
+    result = {k: set() for k in edges}
+    for key in edges:
+        for val in edges[key]:
+            result[val].add(key)
+    return result
 
 
 class BsrDotInc(Operator):
@@ -167,8 +312,10 @@ def optimize(model, dg, max_passes=None):
     # operators without views and then try again merging views (because
     # each operator merge might generate new views).
 
-    single_pass = OpMergePass(dg, model)
+    single_pass = OpMergePass(dg)
 
+    n_initial_ops = len(dg)
+    cum_duration = 0.
     before, after = None, None
     i = 0
     only_merge_ops_with_view = True
@@ -191,8 +338,29 @@ def optimize(model, dg, max_passes=None):
         after = len(dg)
         logger.info(
             "Pass %i [%s]: Reduced %i to %i operators in %fs.",
-            i, "only views" if only_merge_ops_with_view else "all",
+            i, "views" if only_merge_ops_with_view else "non-views",
             before, after, t.duration)
+
+        # Prevent optimizer from running too long if we get up diminishing
+        # returns.
+        # Note that we don't break if there was no reduction at all because
+        # in that case we want to toggle only_merge_ops_with_view which might
+        # still yield some significant reduction.
+        cum_duration += t.duration
+        mean_reduction_rate = float(n_initial_ops - after) / cum_duration
+        last_reduction_rate = float(before - after) / t.duration
+        threshold = 0.01
+        if 0. < last_reduction_rate < threshold * mean_reduction_rate:
+            logger.info(
+                "Operator reduction rate fell below {} mean reduction rate. "
+                "Stopping optimizer.".format(threshold))
+            break
+
+    # Update model signals
+    for sigdict in itervalues(model.sig):
+        for name in sigdict:
+            while sigdict[name] in single_pass.sig_replacements:
+                sigdict[name] = single_pass.sig_replacements[sigdict[name]]
 
     # Reinitialize the model's operator list
     del model.operators[:]
@@ -201,22 +369,25 @@ def optimize(model, dg, max_passes=None):
 
 
 class OpMergePass(object):
-    def __init__(self, dg, model):
-        self.dg = dg
-        self.model = model
-        self.op_replacements = {}
+    def __init__(self, dg):
+        self.dg = BidirectionalDAG(dg)
+        self.might_merge = set(dg)
         self.sig_replacements = {}
-        self.sig2ops = defaultdict(list)
-        self.base2views = defaultdict(list)
-        self.merged = set()
-        self.merged_tc = set()
-        self.opinfo = OpInfo()
+
+        self.sig2ops = WeakKeyDefaultDict(WeakSet)
+        self.base2views = WeakKeyDefaultDict(WeakSet)
+        for op in self.dg.forward:
+            for s in op.all_signals:
+                self.sig2ops[s].add(op)
+                self.base2views[s.base].add(s)
 
         # These variables will be initialized and used on each pass
-        self.only_merge_ops_with_view = None
-        self.step_order = None
-
         self.dependents = None
+        self.only_merge_ops_with_view = None
+
+        self.merged = set()
+        self.merged_dependents = set()
+        self.opinfo = OpInfo()
 
     def __call__(self, only_merge_ops_with_view):
         """Perform a single optimization pass.
@@ -228,27 +399,14 @@ class OpMergePass(object):
         """
 
         # --- Initialize pass state
+        self.dependents = transitive_closure(self.dg.forward)
         self.only_merge_ops_with_view = only_merge_ops_with_view
-        self.op_replacements.clear()
-        self.sig_replacements.clear()
         self.merged.clear()
-        self.merged_tc.clear()
-        self.sig2ops.clear()
+        self.merged_dependents.clear()
         self.opinfo.clear()
 
         # --- Do an optimization pass
-        for op in self.dg:
-            for s in op.all_signals:
-                self.sig2ops[s].append(op)
-                self.base2views[s.base].append(s)
-        self.step_order = toposort(self.dg)
-        self.dependents = transitive_closure(self.dg, self.step_order)
-
-        # --- Most of the magic happens here
         self.perform_merges()
-
-        # --- Clean up after that magic
-        self.finalize()
 
     def perform_merges(self):
         """Go through all operators and merge them where possible.
@@ -261,7 +419,7 @@ class OpMergePass(object):
 
         # We go through the ops grouped by type as only ops with the same
         # type can be merged.
-        by_type = groupby(self.step_order, type)
+        by_type = groupby(self.might_merge, type)
 
         # Note that we will stop once we merge any operator, so merges are
         # performed on at most one type of operator per pass.
@@ -284,12 +442,6 @@ class OpMergePass(object):
             if not self.only_merge_ops_with_view and len(self.merged) > 0:
                 break
 
-        # At this point, we may have marked some ops for merge.
-        # Some signals may therefore have been replaced.
-        # Those signals might be used in some other op, so we go through
-        # all other ops and do the same signal replacement if necessary.
-        self.resolve_views_on_replaced_signals()
-
     def perform_merges_for_subset(self, subset):
         """Performs operator merges for a subset of operators.
 
@@ -299,14 +451,17 @@ class OpMergePass(object):
             Subset of operators.
         """
         by_view = groupby(subset, lambda op: self.opinfo[op].v_base)
-        if self.only_merge_ops_with_view and None in by_view:
-            # If an op has no views, v_base will be None.
-            # If we're only merging views, then we get rid of this subset.
-            del by_view[None]
+        if self.only_merge_ops_with_view:
+            if None in by_view:
+                # If an op has no views, v_base will be None.
+                # If we're only merging views, then we get rid of this subset.
+                del by_view[None]
 
-        for view_subset in itervalues(by_view):
-            if len(view_subset) > 1:
-                self.perform_merges_for_view_subset(view_subset)
+            for view_subset in itervalues(by_view):
+                if len(view_subset) > 1:
+                    self.perform_merges_for_view_subset(view_subset)
+        elif None in by_view and len(by_view[None]) > 1:
+            self.perform_merges_for_view_subset(by_view[None])
 
     def perform_merges_for_view_subset(self, subset):
         """Perform merges for a subset of operators with the same view base.
@@ -331,11 +486,12 @@ class OpMergePass(object):
                 # has been updated
                 continue
 
-            if op1 in self.merged_tc or any(
+            if op1 in self.merged_dependents or any(
                     op in self.merged for op in self.dependents[op1]):
                 continue
 
-            tomerge = OpsToMerge(op1, self.merged, self.merged_tc, self.dependents)
+            tomerge = OpsToMerge(op1, self.merged, self.merged_dependents,
+                                 self.dependents)
 
             # For a merge to be possible the view of the next operator has to
             # start where the view of op1 ends. Because we have sorted the
@@ -356,13 +512,18 @@ class OpMergePass(object):
                     # we can cut the loop short.
                     break
 
+                if op2 in self.merged:
+                    continue
+
                 if OpMerger.is_mergeable(op2, tomerge):
                     tomerge.add(op2)
 
             if len(tomerge.ops) > 1:
                 self.merge(tomerge)
+            elif self.only_merge_ops_with_view:
+                self.might_merge.remove(op1)
 
-    def merge(self, m):
+    def merge(self, tomerge):
         """Merges the given operators.
 
         This method will also update ``op_replacements``, ``sig_replacements``,
@@ -370,25 +531,36 @@ class OpMergePass(object):
         on the same operators before all required operators and signals have
         been replaced.
         """
-        merged_op, merged_sig = OpMerger.merge(m.ops)
-        self.merged.update(m.ops)
-        self.merged_tc.update(m.all_dependents)
-        for op in m.ops:
-            self.op_replacements[op] = merged_op
+        merged_op, merged_sig = OpMerger.merge(tomerge.ops)
+        self.dg.merge(tomerge.ops, merged_op)
+
+        # Update tracking what has been merged and might be mergeable in the
+        # future
+        self.might_merge.difference_update(tomerge.ops)
+        self.might_merge.add(merged_op)
+        self.merged.update(tomerge.ops)
+        self.merged_dependents.update(tomerge.all_dependents)
+
+        for op in tomerge.ops:
             # Mark all operators referencing the same signals as merged
             # (even though they are not) to prevent them from getting
             # merged before their signals have been updated.
             for s in op.all_signals:
                 self.merged.update(self.sig2ops[s])
-        self.sig_replacements.update(merged_sig)
 
-    def resolve_views_on_replaced_signals(self):
-        for sig in list(self.sig_replacements):
+        # Signal related updates
+        self.resolve_views_on_replaced_signals(merged_sig)
+        self.sig_replacements.update(merged_sig)
+        self.replace_op_signals(merged_sig)
+        self.update_signal_indexing(merged_op, merged_sig)
+
+    def resolve_views_on_replaced_signals(self, replaced_signals):
+        for sig in list(replaced_signals):
             for view in self.base2views[sig]:
                 if view is sig:
                     continue
                 assert view.base is sig
-                base_replacement = self.sig_replacements[sig]
+                base_replacement = replaced_signals[sig]
                 offset = view.offset
                 strides = tuple(
                     a // b * c for a, b, c in zip_longest(
@@ -405,40 +577,35 @@ class OpMergePass(object):
                                            shape=view.shape,
                                            offset=offset,
                                            strides=strides)
-                self.sig_replacements[view] = Signal(initial_value,
-                                                     name=view.name,
-                                                     base=base_replacement,
-                                                     readonly=view.readonly)
+                replaced_signals[view] = Signal(initial_value,
+                                                name=view.name,
+                                                base=base_replacement,
+                                                readonly=view.readonly)
 
-    def finalize(self):
-        """Finalizes merges done during the pass."""
-
-        for old, new in iteritems(self.op_replacements):
-            assert old is not new
-            if new not in self.dg:
-                self.dg[new] = set()
-            self.dg[new].update(self.dg[old])
-            del self.dg[old]
-
-        for v in self.dg:
-            # Update dg edges to reflect merges
-            self.dg[v] = {self.op_replacements.get(e, e) for e in self.dg[v]}
-
+    def replace_op_signals(self, replaced_signals):
+        ops = (op for s in replaced_signals for op in self.sig2ops[s])
+        for v in ops:
             # Update the op's signals
             for key in dir(v):
                 sig = getattr(v, key)
                 if isinstance(sig, Signal):
-                    setattr(v, key, self.sig_replacements.get(sig, sig))
+                    setattr(v, key, replaced_signals.get(sig, sig))
 
-            v.sets = [self.sig_replacements.get(s, s) for s in v.sets]
-            v.incs = [self.sig_replacements.get(s, s) for s in v.incs]
-            v.reads = [self.sig_replacements.get(s, s) for s in v.reads]
-            v.updates = [self.sig_replacements.get(s, s) for s in v.updates]
+            v.sets = [replaced_signals.get(s, s) for s in v.sets]
+            v.incs = [replaced_signals.get(s, s) for s in v.incs]
+            v.reads = [replaced_signals.get(s, s) for s in v.reads]
+            v.updates = [replaced_signals.get(s, s) for s in v.updates]
 
-        # Update model.sigs
-        for key in self.model.sig:
-            for name, val in iteritems(self.model.sig[key]):
-                self.model.sig[key][name] = self.sig_replacements.get(val, val)
+    def update_signal_indexing(self, merged_op, replaced_signals):
+        for s in merged_op.all_signals:
+            self.sig2ops[s].add(merged_op)
+            if s.is_view:
+                self.base2views[s.base].add(s)
+
+        for from_sig, to_sig in iteritems(replaced_signals):
+            self.sig2ops[to_sig] = self.sig2ops[from_sig]
+            if to_sig.is_view:
+                self.base2views[to_sig.base].add(to_sig)
 
 
 class OpInfo(Mapping):
@@ -456,7 +623,7 @@ class OpInfo(Mapping):
                 first_view = next(s for s in op.all_signals if s.is_view)
                 self.info[op] = self._OpDetails(first_view=first_view,
                                                 v_offset=first_view.offset,
-                                                v_size=first_view.initial_view.nbytes,
+                                                v_size=first_view.initial_value.nbytes,
                                                 v_base=first_view.base)
             except StopIteration:
                 self.info[op] = self._OpDetails(
@@ -482,9 +649,9 @@ class OpInfo(Mapping):
 class OpsToMerge(object):
     """Analyze and store extra information about a list of ops to be merged."""
 
-    def __init__(self, initial_op, merged, merged_tc, dependents):
+    def __init__(self, initial_op, merged, merged_dependents, dependents):
         self.merged = merged
-        self.merged_tc = merged_tc
+        self.merged_dependents = merged_dependents
         self.dependents = dependents
         self.ops = [initial_op]
         self.optype = type(initial_op)
@@ -539,7 +706,7 @@ class OpMerger(object):
             len(tomerge.dependents[op].intersection(tomerge.ops)) == 0)
         independent_of_prior_merges = (
             op not in tomerge.merged and
-            op not in tomerge.merged_tc and
+            op not in tomerge.merged_dependents and
             all(o not in tomerge.merged for o in tomerge.dependents[op]))
         return (
             type(op) is tomerge.optype and
@@ -893,7 +1060,7 @@ class SigMerger(object):
                     "axis.")
             if s.offset != start:
                 raise ValueError("Views are not sequential.")
-            start = s.offset + s.initial_view.nbytes
+            start = s.offset + s.initial_value.nbytes
 
     @staticmethod
     def merge(signals, axis=0):
