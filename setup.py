@@ -16,7 +16,7 @@ setup(
             '*.npz', '*.gz', '*.pkl']},
     install_requires=[
         'matplotlib',
-        'nengo >= 2.1.2, <2.3',
+        'nengo >= 2.3.0',
         'nengo_ocl >= 1.0.0',
         'numpy>=1.10',
         'psutil',
