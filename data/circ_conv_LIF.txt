@@ -1,16 +1,16 @@
+Building finished in 0:01:32.                                                   
 [INFO] Optimizing model...
-[INFO] Pass 1 [views]: Reduced 26167 to 24161 operators in 8.314988s.
-[INFO] Pass 2 [views]: Reduced 24161 to 20149 operators in 16.984971s.
-[INFO] Pass 3 [views]: Reduced 20149 to 18143 operators in 11.151650s.
-[INFO] Pass 4 [views]: Reduced 18143 to 14131 operators in 18.299989s.
-[INFO] Pass 5 [views]: Reduced 14131 to 10119 operators in 16.312540s.
-[INFO] Pass 6 [views]: Reduced 10119 to 8113 operators in 9.990344s.
-[INFO] Pass 7 [views]: Reduced 8113 to 3098 operators in 16.630989s.
-[INFO] Pass 8 [views]: Reduced 3098 to 2095 operators in 3.115376s.
-[INFO] Pass 9 [views]: Reduced 2095 to 2095 operators in 0.023975s.
-[INFO] Pass 10 [non-views]: Reduced 2095 to 2067 operators in 0.596531s.
-[INFO] Pass 11 [views]: Reduced 2067 to 2066 operators in 0.024555s.
-[INFO] Pass 12 [views]: Reduced 2066 to 2065 operators in 0.390341s.
-[INFO] Pass 13 [views]: Reduced 2065 to 2064 operators in 0.022918s.
-[INFO] Pass 14 [views]: Reduced 2064 to 2064 operators in 0.021077s.
-[INFO] Pass 15 [non-views]: Reduced 2064 to 2064 operators in 0.021158s.
+[INFO] Pass 1 [views]: Reduced 26167 to 24161 operators in 0.991653s.
+[INFO] Pass 2 [views]: Reduced 24161 to 20149 operators in 3.442167s.
+[INFO] Pass 3 [views]: Reduced 20149 to 14131 operators in 2.559592s.
+[INFO] Pass 4 [views]: Reduced 14131 to 12125 operators in 4.725693s.
+[INFO] Pass 5 [views]: Reduced 12125 to 10119 operators in 4.042986s.
+[INFO] Pass 6 [views]: Reduced 10119 to 8113 operators in 3.919229s.
+[INFO] Pass 7 [views]: Reduced 8113 to 6107 operators in 2.655934s.
+[INFO] Pass 8 [views]: Reduced 6107 to 4101 operators in 1.797780s.
+[INFO] Pass 9 [views]: Reduced 4101 to 89 operators in 0.330937s.
+[INFO] Pass 10 [views]: Reduced 89 to 89 operators in 0.002536s.
+[INFO] Pass 11 [non-views]: Reduced 89 to 88 operators in 0.002604s.
+[INFO] Pass 12 [views]: Reduced 88 to 86 operators in 0.002585s.
+[INFO] Pass 13 [views]: Reduced 86 to 85 operators in 0.108525s.
+[INFO] Operator reduction rate fell below 0.01 mean reduction rate. Stopping optimizer.

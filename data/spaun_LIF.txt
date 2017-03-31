@@ -1,17 +1,21 @@
+Building finished in 0:11:39.                                                   
 [INFO] Optimizing model...
-[INFO] Pass 1 [views]: Reduced 996917 to 913666 operators in 308.785199s.
-[INFO] Pass 2 [views]: Reduced 913666 to 825820 operators in 316.574716s.
-[INFO] Pass 3 [views]: Reduced 825820 to 738639 operators in 308.899960s.
-[INFO] Pass 4 [views]: Reduced 738639 to 616173 operators in 370.300883s.
-[INFO] Pass 5 [views]: Reduced 616173 to 526346 operators in 300.204910s.
-[INFO] Pass 6 [views]: Reduced 526346 to 378232 operators in 342.196272s.
-[INFO] Pass 7 [views]: Reduced 378232 to 293733 operators in 174.402904s.
-[INFO] Pass 8 [views]: Reduced 293733 to 279014 operators in 55.244528s.
-[INFO] Pass 9 [views]: Reduced 279014 to 274611 operators in 33.214095s.
-[INFO] Pass 10 [views]: Reduced 274611 to 265262 operators in 54.332755s.
-[INFO] Pass 11 [views]: Reduced 265262 to 264186 operators in 10.264206s.
-[INFO] Pass 12 [views]: Reduced 264186 to 263164 operators in 9.329425s.
-[INFO] Pass 13 [views]: Reduced 263164 to 262653 operators in 7.031127s.
-[INFO] Pass 14 [views]: Reduced 262653 to 262653 operators in 5.471095s.
-[INFO] Pass 15 [non-views]: Reduced 262653 to 262650 operators in 4.646969s.
+[INFO] Pass 1 [views]: Reduced 996917 to 913666 operators in 121.919188s.
+[INFO] Pass 2 [views]: Reduced 913666 to 834975 operators in 178.251530s.
+[INFO] Pass 3 [views]: Reduced 834975 to 740477 operators in 134.020064s.
+[INFO] Pass 4 [views]: Reduced 740477 to 641537 operators in 142.054330s.
+[INFO] Pass 5 [views]: Reduced 641537 to 548752 operators in 144.569004s.
+[INFO] Pass 6 [views]: Reduced 548752 to 481411 operators in 103.964679s.
+[INFO] Pass 7 [views]: Reduced 481411 to 416266 operators in 91.571370s.
+[INFO] Pass 8 [views]: Reduced 416266 to 342898 operators in 71.935240s.
+[INFO] Pass 9 [views]: Reduced 342898 to 256128 operators in 46.414538s.
+[INFO] Pass 10 [views]: Reduced 256128 to 210029 operators in 45.133131s.
+[INFO] Pass 11 [views]: Reduced 210029 to 186260 operators in 14.304321s.
+[INFO] Pass 12 [views]: Reduced 186260 to 176120 operators in 8.329654s.
+[INFO] Pass 13 [views]: Reduced 176120 to 171682 operators in 8.890439s.
+[INFO] Pass 14 [views]: Reduced 171682 to 166834 operators in 6.787773s.
+[INFO] Pass 15 [views]: Reduced 166834 to 162722 operators in 5.469018s.
+[INFO] Pass 16 [views]: Reduced 162722 to 162194 operators in 2.991492s.
+[INFO] Pass 17 [views]: Reduced 162194 to 161166 operators in 2.773565s.
+[INFO] Pass 18 [views]: Reduced 161166 to 161161 operators in 2.652379s.
 [INFO] Operator reduction rate fell below 0.01 mean reduction rate. Stopping optimizer.

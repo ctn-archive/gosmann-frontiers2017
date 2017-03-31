@@ -1,23 +1,85 @@
+Building finished in 0:00:03.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:02.                                                   
+Building finished in 0:00:37.                                                   
 [INFO] Optimizing model...
-[INFO] Pass 1 [views]: Reduced 6265 to 5834 operators in 0.416947s.
-[INFO] Pass 2 [views]: Reduced 5834 to 5010 operators in 0.729404s.
-[INFO] Pass 3 [views]: Reduced 5010 to 4572 operators in 0.511322s.
-[INFO] Pass 4 [views]: Reduced 4572 to 3719 operators in 0.586440s.
-[INFO] Pass 5 [views]: Reduced 3719 to 2892 operators in 0.640834s.
-[INFO] Pass 6 [views]: Reduced 2892 to 2403 operators in 0.471327s.
-[INFO] Pass 7 [views]: Reduced 2403 to 1402 operators in 0.471322s.
-[INFO] Pass 8 [views]: Reduced 1402 to 1189 operators in 0.223089s.
-[INFO] Pass 9 [views]: Reduced 1189 to 1189 operators in 0.014861s.
-[INFO] Pass 10 [non-views]: Reduced 1189 to 1186 operators in 0.014022s.
-[INFO] Pass 11 [views]: Reduced 1186 to 1180 operators in 0.017599s.
-[INFO] Pass 12 [views]: Reduced 1180 to 1177 operators in 0.016929s.
-[INFO] Pass 13 [views]: Reduced 1177 to 1175 operators in 0.015530s.
-[INFO] Pass 14 [views]: Reduced 1175 to 1169 operators in 0.016716s.
-[INFO] Pass 15 [views]: Reduced 1169 to 1169 operators in 0.014297s.
-[INFO] Pass 16 [non-views]: Reduced 1169 to 985 operators in 0.254803s.
-[INFO] Pass 17 [views]: Reduced 985 to 975 operators in 0.106124s.
-[INFO] Pass 18 [views]: Reduced 975 to 964 operators in 0.066467s.
-[INFO] Pass 19 [views]: Reduced 964 to 960 operators in 0.013707s.
-[INFO] Pass 20 [views]: Reduced 960 to 959 operators in 0.013725s.
-[INFO] Pass 21 [views]: Reduced 959 to 959 operators in 0.010544s.
-[INFO] Pass 22 [non-views]: Reduced 959 to 959 operators in 0.010014s.
+[INFO] Pass 1 [views]: Reduced 6265 to 5834 operators in 0.188221s.
+[INFO] Pass 2 [views]: Reduced 5834 to 5138 operators in 0.343435s.
+[INFO] Pass 3 [views]: Reduced 5138 to 4155 operators in 0.267565s.
+[INFO] Pass 4 [views]: Reduced 4155 to 3468 operators in 0.385012s.
+[INFO] Pass 5 [views]: Reduced 3468 to 2959 operators in 0.307355s.
+[INFO] Pass 6 [views]: Reduced 2959 to 2461 operators in 0.255432s.
+[INFO] Pass 7 [views]: Reduced 2461 to 2032 operators in 0.253013s.
+[INFO] Pass 8 [views]: Reduced 2032 to 1578 operators in 0.144796s.
+[INFO] Pass 9 [views]: Reduced 1578 to 772 operators in 0.072121s.
+[INFO] Pass 10 [views]: Reduced 772 to 750 operators in 0.011554s.
+[INFO] Pass 11 [views]: Reduced 750 to 746 operators in 0.008267s.
+[INFO] Pass 12 [views]: Reduced 746 to 746 operators in 0.007735s.
+[INFO] Pass 13 [non-views]: Reduced 746 to 727 operators in 0.014917s.
+[INFO] Pass 14 [views]: Reduced 727 to 715 operators in 0.015686s.
+[INFO] Pass 15 [views]: Reduced 715 to 688 operators in 0.017999s.
+[INFO] Pass 16 [views]: Reduced 688 to 679 operators in 0.013782s.
+[INFO] Pass 17 [views]: Reduced 679 to 672 operators in 0.013764s.
+[INFO] Pass 18 [views]: Reduced 672 to 668 operators in 0.010303s.
+[INFO] Pass 19 [views]: Reduced 668 to 640 operators in 0.012510s.
+[INFO] Pass 20 [views]: Reduced 640 to 640 operators in 0.008630s.
+[INFO] Pass 21 [non-views]: Reduced 640 to 638 operators in 0.010182s.
+[INFO] Pass 22 [views]: Reduced 638 to 634 operators in 0.010546s.
+[INFO] Pass 23 [views]: Reduced 634 to 632 operators in 0.009457s.
+[INFO] Pass 24 [views]: Reduced 632 to 630 operators in 0.008608s.
+[INFO] Pass 25 [views]: Reduced 630 to 630 operators in 0.008270s.
+[INFO] Pass 26 [non-views]: Reduced 630 to 629 operators in 0.008532s.
+[INFO] Pass 27 [views]: Reduced 629 to 627 operators in 0.008673s.
+[INFO] Pass 28 [views]: Reduced 627 to 627 operators in 0.008369s.
+[INFO] Pass 29 [non-views]: Reduced 627 to 626 operators in 0.008563s.
+[INFO] Pass 30 [views]: Reduced 626 to 625 operators in 0.009377s.
+[INFO] Pass 31 [views]: Reduced 625 to 624 operators in 0.009953s.
+[INFO] Pass 32 [views]: Reduced 624 to 623 operators in 0.009925s.
+[INFO] Pass 33 [views]: Reduced 623 to 619 operators in 0.009327s.
+[INFO] Pass 34 [views]: Reduced 619 to 619 operators in 0.008180s.
+[INFO] Pass 35 [non-views]: Reduced 619 to 594 operators in 0.021110s.
+[INFO] Pass 36 [views]: Reduced 594 to 585 operators in 0.019489s.
+[INFO] Pass 37 [views]: Reduced 585 to 577 operators in 0.014414s.
+[INFO] Pass 38 [views]: Reduced 577 to 574 operators in 0.010646s.
+[INFO] Pass 39 [views]: Reduced 574 to 572 operators in 0.011782s.
+[INFO] Pass 40 [views]: Reduced 572 to 565 operators in 0.012325s.
+[INFO] Pass 41 [views]: Reduced 565 to 548 operators in 0.011185s.
+[INFO] Pass 42 [views]: Reduced 548 to 536 operators in 0.009871s.
+[INFO] Pass 43 [views]: Reduced 536 to 536 operators in 0.007424s.
+[INFO] Pass 44 [non-views]: Reduced 536 to 533 operators in 0.008727s.
+[INFO] Pass 45 [views]: Reduced 533 to 527 operators in 0.023043s.
+[INFO] Pass 46 [views]: Reduced 527 to 521 operators in 0.032056s.
+[INFO] Pass 47 [views]: Reduced 521 to 515 operators in 0.007149s.
+[INFO] Pass 48 [views]: Reduced 515 to 515 operators in 0.007399s.
+[INFO] Pass 49 [non-views]: Reduced 515 to 513 operators in 0.009318s.
+[INFO] Pass 50 [views]: Reduced 513 to 511 operators in 0.007016s.
+[INFO] Pass 51 [views]: Reduced 511 to 511 operators in 0.006685s.
+[INFO] Pass 52 [non-views]: Reduced 511 to 509 operators in 0.010226s.
+[INFO] Pass 53 [views]: Reduced 509 to 507 operators in 0.006977s.
+[INFO] Pass 54 [views]: Reduced 507 to 507 operators in 0.006652s.
+[INFO] Pass 55 [non-views]: Reduced 507 to 506 operators in 0.010426s.
+[INFO] Pass 56 [views]: Reduced 506 to 505 operators in 0.006934s.
+[INFO] Pass 57 [views]: Reduced 505 to 505 operators in 0.006653s.
+[INFO] Pass 58 [non-views]: Reduced 505 to 502 operators in 0.012710s.
+[INFO] Pass 59 [views]: Reduced 502 to 496 operators in 0.009752s.
+[INFO] Pass 60 [views]: Reduced 496 to 490 operators in 0.007501s.
+[INFO] Pass 61 [views]: Reduced 490 to 490 operators in 0.006566s.
+[INFO] Pass 62 [non-views]: Reduced 490 to 433 operators in 0.070968s.
+[INFO] Pass 63 [views]: Reduced 433 to 430 operators in 0.040363s.
+[INFO] Pass 64 [views]: Reduced 430 to 427 operators in 0.006646s.
+[INFO] Pass 65 [views]: Reduced 427 to 427 operators in 0.005853s.
+[INFO] Pass 66 [non-views]: Reduced 427 to 427 operators in 0.007054s.
