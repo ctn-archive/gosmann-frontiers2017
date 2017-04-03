@@ -8,16 +8,16 @@ maintain. Here, we present an algorithm that optimizes the computational graph
 of the Nengo neural network simulator, allowing simulations to run more quickly
 on commodity hardware.  This is achieved by merging identical operations into
 single operations and restructuring the accessed data in larger blocks of
-sequential memory. In this way, a 2.8 to 5 time speed-up is obtained. While this
-does not beat the specialized OpenCL implementation of Nengo, this optimization
-is available on any platform that can run Python.  In contrast, the OpenCL
-implementation supports fewer platforms and can be difficult to install.
+sequential memory. In this way, a time speed-up of up to 6.8 is obtained. While
+this does not beat the specialized OpenCL implementation of Nengo, this
+optimization is available on any platform that can run Python.  In contrast, the
+OpenCL implementation supports fewer platforms and can be difficult to install.
 
 ## Requirements
 
 To run the source code [Python](https://www.python.org) is required. Benchmarks
 were run with Python 3.4.2, while data analysis and plotting code was run with
-Python 3.5.2. The code might run as well with Python 2.7, but this was not
+Python 3.6.1. The code might run as well with Python 2.7, but this was not
 tested.
 
 The complete list of dependencies to run all parts is given in
